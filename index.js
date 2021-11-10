@@ -52,12 +52,42 @@ async function run() {
             res.send(event);
         })
 
-        //add orders api
+        //post orders api
         app.post('/orders', async (req, res) => {
             const order = req.body;
             const result = await orderCollection.insertOne(order);
             res.json(result)
         })
+
+        //get orders api
+
+        app.get('/orders', async (req, res) => {
+            const cursor = orderCollection.find({});
+            const orders = await cursor.toArray();
+            res.send(orders);
+        })
+
+        //DELETE api for specific id
+        app.delete('/orders/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await orderCollection.deleteOne(query);
+            res.json(result)
+        })
+
+        //GET specific id for delete
+        app.get('/orders/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const result = await orderCollection.findOne(query);
+            res.send(result);
+        })
+
+
+
+
+
+
     }
     finally {
         // await client.close()
