@@ -21,6 +21,7 @@ async function run() {
         await client.connect();
         const database = client.db('bikeWala');
         const productsCollection = database.collection('products');
+        const orderCollection = database.collection('orders');
 
         //Post api for Products 
         app.post('/products', async (req, res) => {
@@ -31,9 +32,31 @@ async function run() {
 
         //GET  api for Products
         app.get('/products', async (req, res) => {
+            const cursor = productsCollection.find({}).limit(6);
+            const product = await cursor.toArray();
+            res.send(product);
+        })
+
+        //GET  api for all Products
+        app.get('/allProducts', async (req, res) => {
             const cursor = productsCollection.find({});
             const product = await cursor.toArray();
             res.send(product);
+        })
+
+        // for dynamic route 
+        app.get('/products/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const event = await productsCollection.findOne(query);
+            res.send(event);
+        })
+
+        //add orders api
+        app.post('/orders', async (req, res) => {
+            const order = req.body;
+            const result = await orderCollection.insertOne(order);
+            res.json(result)
         })
     }
     finally {
