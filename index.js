@@ -23,7 +23,8 @@ async function run() {
         const database = client.db('bikeWala');
         const productsCollection = database.collection('products');
         const orderCollection = database.collection('orders');
-        const usersCollection = database.collection('users')
+        const usersCollection = database.collection('users');
+        const reviewCollection = database.collection('reviews');
 
         //Post api for Products 
         app.post('/products', async (req, res) => {
@@ -54,11 +55,34 @@ async function run() {
             res.send(event);
         })
 
+        //DELETE api for specific id from products
+        app.delete('/products/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await productsCollection.deleteOne(query);
+            res.json(result)
+        })
+
+
         //post orders api
         app.post('/orders', async (req, res) => {
             const order = req.body;
             const result = await orderCollection.insertOne(order);
-            res.json(result)
+            res.json(result);
+        })
+
+        //POST for review 
+        app.post('/reviews', async (req, res) => {
+            const review = req.body;
+            const result = await reviewCollection.insertOne(review);
+            res.json(result);
+        })
+
+        //GET  for Review
+        app.get('/reviews', async (req, res) => {
+            const cursor = reviewCollection.find({});
+            const reviews = await cursor.toArray();
+            res.send(reviews);
         })
 
         //get orders api
@@ -120,6 +144,21 @@ async function run() {
                 isAdmin = true;
             }
             res.json({ admin: isAdmin });
+        })
+
+        //Update api
+
+        app.put('/orders/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    status: "shipped"
+                },
+            };
+            const result = await orderCollection.updateOne(filter, updateDoc, options)
+            res.json(result)
         })
 
 
